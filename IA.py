@@ -351,7 +351,8 @@ def posicoesDisp(estado):
 def escolherJogada(memoria, velha):
     estado = str(velha)
     vazio = posicoesDisp(velha)
-    if memoria == {}:
+    rand = random.randrange(0,10)
+    if memoria == {}:# or rand<2:
         return random.choice(vazio)
     else:
         pontuacao = [memoria.get((estado, pos), 0) if pos in vazio else -float('inf') for pos in range(9)]
@@ -360,11 +361,11 @@ def escolherJogada(memoria, velha):
         return random.choice(melhores_jogadas)
     
 def ler_memoria():
+    jogadas = {}
     if os.path.exists("memoria.txt"):
         with open("memoria.txt", "r") as f:
             jogadas = eval(f.read())
-    else:
-        jogadas = {}
+    
     return jogadas                      
     
 def jInteligente(jog, v):
@@ -438,6 +439,7 @@ def resetar():
     global vitoria
     global vencedor
     global velha
+    global partida
     #os.system("cls")
         
     nJogadas = 0
@@ -445,6 +447,7 @@ def resetar():
     vitoria = False
     vencedor = ""
     velha = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
+    partida = []
     
 #Gerar arquivo exel    
 def fileExel(jogar):
@@ -476,9 +479,13 @@ def fileMatriz(jogar):
         #print(df)
         df.to_csv("braboXbrabo.csv", sep=',', index=False)  
         
-def armazenar_memoria(jogadas):
+def armazenar_memoria(jogadas):    
     with open("memoria.txt", "w") as f:
         f.write(str(jogadas))
+        
+    with open("memoOrg.txt", "w") as f:
+        for i in jogadas.keys():            
+            f.write(f"{i}:{jogadas[i]},\n")
 
 
 partida = []  
@@ -502,6 +509,7 @@ while jogar<10000:
                 for i in partida:
                     if memoria.get(i):
                         memoria[i] += 1
+                        
                     else:
                         memoria[i]=1
             elif vencedor==2:
@@ -520,10 +528,16 @@ while jogar<10000:
             #print("*"*30)
             #print("Empatou!")
             #print("*"*30)
+            for i in partida:
+                    if memoria.get(i):
+                        memoria[i] += 0
+                    else:
+                        memoria[i]=0
             vencedor = 0
             nEmpates+=1
             fileExel(jogar)
-            jogar+=1            
+            jogar+=1  
+            armazenar_memoria(memoria)          
             break
     #print(jogar)
     #jogar = input("Deseja jogar novamente?(s/n): ")
